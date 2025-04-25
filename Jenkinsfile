@@ -2,34 +2,27 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone') {
+        stage('Git Checkout') {
             steps {
-                git branch: 'main',
-                    credentialsId: 'github-token',
-                    url: 'https://github.com/chandantiwari9159/E-Commerce-Website.git'
+                git url: 'https://github.com/chandantiwari9159/E-Commerce-Website.git'
             }
         }
 
-        stage('Build') {
+        stage('Docker Build') {
             steps {
-                echo 'Building the project...'
-                // Example: npm install or any other build steps
-                // sh 'npm install'
+                sh 'docker build -t my-static-site .'
             }
         }
 
-        stage('Test') {
+        stage('Docker Run') {
             steps {
-                echo 'Running tests...'
-                // Example: sh 'npm test' or unit testing command
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo 'Deploying to local server...'
-                // Example: docker run or deploy to local folder
+                sh '''
+                    docker stop ecommerce-container || true
+                    docker rm ecommerce-container || true
+                    docker run -d -p 80:80 --name ecommerce-container my-static-site
+                '''
             }
         }
     }
 }
+
