@@ -1,28 +1,24 @@
 pipeline {
     agent any
-
     stages {
-        stage('Git Checkout') {
+        stage('Clone from GitHub') {
             steps {
-                git url: 'https://github.com/chandantiwari9159/E-Commerce-Website.git'
+                git branch: 'main', url: 'https://github.com/chandantiwari9159/E-Commerce-Website.git'
             }
         }
-
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker build -t my-static-site .'
+                script {
+                    docker.build('my-static-site')
+                }
             }
         }
-
-        stage('Docker Run') {
+        stage('Run Docker Container') {
             steps {
-                sh '''
-                    docker stop ecommerce-container || true
-                    docker rm ecommerce-container || true
-                    docker run -d -p 80:80 --name ecommerce-container my-static-site
-                '''
+                script {
+                    docker.image('my-static-site').run('-p 8081:80')
+                }
             }
         }
     }
 }
-
